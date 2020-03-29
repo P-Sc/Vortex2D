@@ -115,8 +115,7 @@ TEST(BoundariesTests, Square)
   device->Handle().waitIdle();
 
   Texture outTexture(*device, size.x, size.y, vk::Format::eR32Sfloat, VMA_MEMORY_USAGE_CPU_ONLY);
-  device->Execute(
-      [&](vk::CommandBuffer commandBuffer) { outTexture.CopyFrom(commandBuffer, levelSet); });
+  device->Execute([&](CommandEncoder& command) { outTexture.CopyFrom(command, levelSet); });
 
   CheckLevelSet(data, outTexture);
 }
@@ -144,8 +143,7 @@ TEST(BoundariesTests, InverseSquare)
   device->Handle().waitIdle();
 
   Texture outTexture(*device, size.x, size.y, vk::Format::eR32Sfloat, VMA_MEMORY_USAGE_CPU_ONLY);
-  device->Execute(
-      [&](vk::CommandBuffer commandBuffer) { outTexture.CopyFrom(commandBuffer, levelSet); });
+  device->Execute([&](CommandEncoder& command) { outTexture.CopyFrom(command, levelSet); });
 
   CheckLevelSet(data, outTexture);
 }
@@ -169,8 +167,7 @@ TEST(BoundariesTests, Circle)
   device->Handle().waitIdle();
 
   Texture outTexture(*device, size.x, size.y, vk::Format::eR32Sfloat, VMA_MEMORY_USAGE_CPU_ONLY);
-  device->Execute(
-      [&](vk::CommandBuffer commandBuffer) { outTexture.CopyFrom(commandBuffer, levelSet); });
+  device->Execute([&](CommandEncoder& command) { outTexture.CopyFrom(command, levelSet); });
 
   CheckLevelSet(data, outTexture);
 }
@@ -206,8 +203,7 @@ TEST(BoundariesTests, Intersection)
   device->Handle().waitIdle();
 
   Texture outTexture(*device, size.x, size.y, vk::Format::eR32Sfloat, VMA_MEMORY_USAGE_CPU_ONLY);
-  device->Execute(
-      [&](vk::CommandBuffer commandBuffer) { outTexture.CopyFrom(commandBuffer, levelSet); });
+  device->Execute([&](CommandEncoder& command) { outTexture.CopyFrom(command, levelSet); });
 
   CheckLevelSet(data, outTexture);
 }
@@ -220,9 +216,9 @@ TEST(BoundariesTest, DistanceField)
 
   std::vector<float> data(size.x * size.y, 0.1f);
   Texture localLevelSet(*device, size.x, size.y, vk::Format::eR32Sfloat, VMA_MEMORY_USAGE_CPU_ONLY);
-  device->Execute([&](vk::CommandBuffer commandBuffer) {
+  device->Execute([&](CommandEncoder& command) {
     localLevelSet.CopyFrom(data);
-    levelSet.CopyFrom(commandBuffer, localLevelSet);
+    levelSet.CopyFrom(command, localLevelSet);
   });
 
   DistanceField distance(*device, levelSet);
@@ -235,8 +231,7 @@ TEST(BoundariesTest, DistanceField)
   output.Record({distance}).Submit();
   device->Handle().waitIdle();
 
-  device->Execute(
-      [&](vk::CommandBuffer commandBuffer) { localOutput.CopyFrom(commandBuffer, output); });
+  device->Execute([&](CommandEncoder& command) { localOutput.CopyFrom(command, output); });
 
   uint8_t alpha = static_cast<uint8_t>(255 * (0.1f + 0.5f));
   uint8_t r = static_cast<uint8_t>(255 * distance.Colour.r);
